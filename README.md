@@ -6,9 +6,15 @@ live local webpage animating the attention weights as glowing lines between
 words on every save. It turns an abstract ML diagram into something you poke
 at with your own sentences.
 
-This milestone implements the attention core: a single self-attention head
-with seeded random projections (no training, no learned weights). Given the
-same text, it always produces the same attention weights.
+This milestone adds the tokenizer and embedding lookup that feed the
+attention core. The tokenizer splits arbitrary text into words and
+punctuation/symbol marks without silently dropping any character (it
+handles unicode letters, hyphenated and apostrophe-joined words, digits,
+and arbitrary punctuation). The embedding lookup turns each token into a
+fixed-dimension vector by hashing the token into a seed and sampling from
+it, so the same token always maps to the same vector, with no training and
+no learned weights. A small memoizing lookup table avoids re-hashing the
+same token twice within a sentence.
 
 ## Install
 

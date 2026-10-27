@@ -1,7 +1,7 @@
 import math
 import random
 
-from .embeddings import embed
+from .embeddings import EmbeddingTable
 from .tokenize import tokenize
 
 DEFAULT_DIM = 16
@@ -61,9 +61,10 @@ class AttentionHead:
         self.w_query = _random_matrix(dim, self.d_k, seed)
         self.w_key = _random_matrix(dim, self.d_k, seed + 1)
         self.w_value = _random_matrix(dim, self.d_k, seed + 2)
+        self.embedding_table = EmbeddingTable(dim)
 
     def embed_tokens(self, tokens):
-        return [embed(tok, self.dim) for tok in tokens]
+        return self.embedding_table.lookup_many(tokens)
 
     def forward(self, tokens):
         if not tokens:
