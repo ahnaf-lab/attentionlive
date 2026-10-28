@@ -16,6 +16,16 @@ it, so the same token always maps to the same vector, with no training and
 no learned weights. A small memoizing lookup table avoids re-hashing the
 same token twice within a sentence.
 
+This milestone also adds a watcher daemon. It polls a plain text scratch
+file you point it at, and whenever the file's content changes (detected by
+hashing the file, not by trusting its last-modified time, since two quick
+saves can land within the same mtime tick), it recomputes the attention
+matrix for the file's current text and broadcasts the result as JSON to
+any locally connected client over Server-Sent Events (SSE). The only
+network behavior is this local HTTP server: by default it binds to
+`127.0.0.1` so the stream is reachable only from the machine running it,
+never the network.
+
 ## Install
 
 Requires Python 3.9+. No third-party dependencies — everything (tokenizing,
@@ -38,6 +48,21 @@ python3 -m attentionlive "the cat sat on the mat"
 
 This prints the tokenized sentence and the row-normalized attention weight
 matrix: row `i` shows how much token `i` attends to every other token.
+
+Watch a scratch file and stream its attention weights as JSON over SSE
+whenever you save it:
+
+```
+python3 -m attentionlive.watch path/to/scratch.txt
+```
+
+This starts a local HTTP server (default `http://127.0.0.1:8765/events`)
+and prints its address. Connect to that URL with any SSE client (for
+example `curl -N http://127.0.0.1:8765/events`) to receive a `data: {...}`
+event, containing the current text, tokens, and attention weight matrix,
+every time the scratch file's content changes. Use `--host`, `--port`, and
+`--poll-interval` to change the bind address, port, or how often the file
+is checked for changes.
 
 Run the test suite:
 
