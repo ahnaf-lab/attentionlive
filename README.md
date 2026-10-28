@@ -26,6 +26,16 @@ network behavior is this local HTTP server: by default it binds to
 `127.0.0.1` so the stream is reachable only from the machine running it,
 never the network.
 
+This milestone adds a live page served at the daemon's root path. It is a
+single self-contained HTML document with an inline SVG stage and a small
+script, no build step and no external assets: the script opens an
+`EventSource` to the same server's `/events` stream and, on every pushed
+payload, lays tokens out along a line and draws a glowing edge between
+every pair of tokens whose thickness and opacity scale with how strongly
+that pair attends to each other. Existing SVG elements are updated in
+place (not torn down and recreated) so CSS transitions animate the edges
+and labels smoothly from one saved sentence to the next.
+
 ## Install
 
 Requires Python 3.9+. No third-party dependencies — everything (tokenizing,
@@ -56,13 +66,17 @@ whenever you save it:
 python3 -m attentionlive.watch path/to/scratch.txt
 ```
 
-This starts a local HTTP server (default `http://127.0.0.1:8765/events`)
-and prints its address. Connect to that URL with any SSE client (for
-example `curl -N http://127.0.0.1:8765/events`) to receive a `data: {...}`
-event, containing the current text, tokens, and attention weight matrix,
-every time the scratch file's content changes. Use `--host`, `--port`, and
-`--poll-interval` to change the bind address, port, or how often the file
-is checked for changes.
+This starts a local HTTP server (default `http://127.0.0.1:8765`) and
+prints its address. Open `http://127.0.0.1:8765/` in a browser to watch
+the live page: it draws a glowing line between every pair of tokens,
+weighted by how much attention they pay each other, and redraws itself
+every time you save the scratch file. The raw stream backing that page is
+also available directly: connect to `http://127.0.0.1:8765/events` with
+any SSE client (for example `curl -N http://127.0.0.1:8765/events`) to
+receive a `data: {...}` event, containing the current text, tokens, and
+attention weight matrix, every time the scratch file's content changes.
+Use `--host`, `--port`, and `--poll-interval` to change the bind address,
+port, or how often the file is checked for changes.
 
 Run the test suite:
 

@@ -9,6 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from queue import Queue
 
 from .attention import run_attention
+from .page import PAGE_HTML_BYTES
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
@@ -103,11 +104,22 @@ def make_handler(broadcaster):
             pass
 
         def do_GET(self):
-            if self.path != "/events":
+            if self.path == "/":
+                self._serve_page()
+            elif self.path == "/events":
+                self._serve_events()
+            else:
                 self.send_response(404)
                 self.end_headers()
-                return
 
+        def _serve_page(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(PAGE_HTML_BYTES)))
+            self.end_headers()
+            self.wfile.write(PAGE_HTML_BYTES)
+
+        def _serve_events(self):
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-cache")
@@ -172,6 +184,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     print(f"watching {args.path!r}")
+    print(f"live page: http://{args.host}:{args.port}/")
     print(f"SSE stream: http://{args.host}:{args.port}/events")
     try:
         serve(args.path, host=args.host, port=args.port,
