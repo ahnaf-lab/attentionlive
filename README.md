@@ -47,6 +47,12 @@ matrix, and exact SVG markup, each captured once from a known-good run and
 compared verbatim, so any future change that silently shifts the numbers
 or the markup gets caught immediately.
 
+This milestone packages the three pieces above behind a single
+`attentionlive` command (`cli.py`), installed as a console script, so
+nobody needs to know the module layout (`attentionlive.watch`,
+`attentionlive.svg`, ...) to use the tool. `run`, `watch`, and `svg` are
+now subcommands of one entry point.
+
 ## Install
 
 Requires Python 3.9+. No third-party dependencies — everything (tokenizing,
@@ -57,24 +63,30 @@ visible rather than reach for a tensor library to hide it.
 ```
 git clone <this-repo>
 cd attentionlive
+pip install -e .
 ```
+
+This installs a single `attentionlive` command. If you'd rather not
+install anything, every subcommand below also works as
+`python3 -m attentionlive <subcommand> ...` run from the repository root.
 
 ## Usage
 
 Run the attention head over a sentence from the command line:
 
 ```
-python3 -m attentionlive "the cat sat on the mat"
+attentionlive run "the cat sat on the mat"
 ```
 
 This prints the tokenized sentence and the row-normalized attention weight
 matrix: row `i` shows how much token `i` attends to every other token.
+Omit the sentence to run it over a default one.
 
 Watch a scratch file and stream its attention weights as JSON over SSE
 whenever you save it:
 
 ```
-python3 -m attentionlive.watch path/to/scratch.txt
+attentionlive watch path/to/scratch.txt
 ```
 
 This starts a local HTTP server (default `http://127.0.0.1:8765`) and
@@ -93,7 +105,7 @@ Render a sentence's attention weights as a one-off static SVG file, with
 no server involved:
 
 ```
-python3 -m attentionlive.svg "the cat sat on the mat" > sentence.svg
+attentionlive svg "the cat sat on the mat" > sentence.svg
 ```
 
 Use `--width`, `--height`, and `--margin` to change the canvas size and

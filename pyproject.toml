@@ -5,6 +5,9 @@ description = "A live, poke-at-it visualization of a hand-rolled self-attention 
 requires-python = ">=3.9"
 dependencies = []
 
+[project.scripts]
+attentionlive = "attentionlive.cli:main"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
