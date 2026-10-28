@@ -36,6 +36,17 @@ that pair attends to each other. Existing SVG elements are updated in
 place (not torn down and recreated) so CSS transitions animate the edges
 and labels smoothly from one saved sentence to the next.
 
+This milestone adds a static SVG renderer and golden tests. `svg.py`
+renders a sentence's tokens and attention weights as a standalone,
+non-animated SVG document that is a pure function of its inputs: the same
+tokens and weights always produce byte-for-byte the same markup, with no
+timestamps, randomness, or dict/set ordering involved. That determinism is
+what the golden tests in `tests/test_svg.py` pin down: a fixed sentence is
+asserted to produce an exact tokens list, an exact attention weight
+matrix, and exact SVG markup, each captured once from a known-good run and
+compared verbatim, so any future change that silently shifts the numbers
+or the markup gets caught immediately.
+
 ## Install
 
 Requires Python 3.9+. No third-party dependencies — everything (tokenizing,
@@ -77,6 +88,16 @@ receive a `data: {...}` event, containing the current text, tokens, and
 attention weight matrix, every time the scratch file's content changes.
 Use `--host`, `--port`, and `--poll-interval` to change the bind address,
 port, or how often the file is checked for changes.
+
+Render a sentence's attention weights as a one-off static SVG file, with
+no server involved:
+
+```
+python3 -m attentionlive.svg "the cat sat on the mat" > sentence.svg
+```
+
+Use `--width`, `--height`, and `--margin` to change the canvas size and
+the horizontal margin tokens are laid out within.
 
 Run the test suite:
 
